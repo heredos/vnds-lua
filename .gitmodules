@@ -1,0 +1,3 @@
+[submodule "lua-xmlparser"]
+	path = lua-xmlparser
+	url = https://github.com/jonathanpoelen/lua-xmlparser.git
