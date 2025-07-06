@@ -40,13 +40,14 @@ function vnds.init(folder, functions)
     vnds.scripts = {}
     vnds.loading = false
 
-    -- get the title, description and infos of the game
+    -- check if the info file is present. if it isn't abort.
     file = io.open(folder .. "/info.txt", "r")
     if not file then
         print("provided folder (" .. folder .. ") is not a vnds folder")
         return
     end
 
+    -- get the title, description and infos of the game
     for line in file:lines() do
         eqpos = line:find("=")
         if eqpos then
@@ -57,7 +58,7 @@ function vnds.init(folder, functions)
     end
     file:close()
 
-    -- use the default functions if there is no reimplementation
+    -- use the default functions if there is no reimplementation (the function argument are overrides to the defaults.)
     for k, v in pairs(defaultFunctions) do
         if not vnds.functions[k] then
             vnds.functions[k] = v
@@ -67,12 +68,33 @@ function vnds.init(folder, functions)
     vnds.loadGlobals()
 end
 
+function vnds.loadGlobals()
+    -- use the global.sav xml file to load all the global variables
+    --
+    globs = parseXmlFile(vnds.path .. "/save/global.sav")
+    -- if the file does not exist return nothing, there are no globals to load
+    if not globs then return end
+
+    -- load and print each global var.
+    print("GLOBALS: ")
+    for k, v in pairs(globs.children[1].children) do
+        print("\t" .. v.attrs.name .. " = " .. v.attrs.value)
+        vnds.vars[v.attrs.name] = {}
+        if v.attrs.type == "int" then
+            vnds.vars[v.attrs.name].value = tonumber(v.attrs.value)
+        else
+            vnds.vars[v.attrs.name].value = v.attrs.value
+        end
+        vnds.vars[v.attrs.name].global = true
+    end
+end
+
 function vnds.load(saveSlot)
-    -- TODO: load save
+    -- TODO: load save if a sloat is provided
     if saveSlot then
         -- Load save data from file
     else
-        -- Set default save data
+        -- Set default data
         vnds.vars = {}
         vnds.script = "main"
         vnds.line = 1
@@ -84,7 +106,7 @@ function vnds.load(saveSlot)
         -- is it running?
         if coroutine.status(vnds.interpreterRoutine) == "running" or coroutine.status(vnds.interpreter) == "suspended" then
             -- stop the coroutine
-            coroutine.stop(vnds.interpreterRoutine)
+            coroutine.close(vnds.interpreterRoutine)
         end
     end
 
@@ -96,25 +118,47 @@ function vnds.load(saveSlot)
     coroutine.resume(vnds.interpreterRoutine)
 end
 
+-- this is confusing, i know, but runscript just sets "which script to run",
+-- while loadscript loads all the necessary info to run the script
+function vnds.runScript(script, line)
+    line = line or nil
+
+    if vnds.scripts[script] == nil then
+        vnds.loadScript(script)
+    end
+    -- TODO: run script
+    vnds.script = script
+    if line then
+        vnds.line = line
+    else
+        vnds.line = 1
+    end
+end
+
 function vnds.loadScript(script)
     print("parsing " .. script)
+    -- of we already loaded the script, we don't need to reload it
     if vnds.scripts[script] then
         return
     end
+
+    -- set the status as loading and init the labels and line lookup tables
     vnds.loading = true
     vnds.scripts[script] = {}
     vnds.scripts[script].labels = {}
     vnds.scripts[script].lines = {}
 
+    -- open the file and check it does exist
     file = io.open(vnds.path .. "/script/" .. script .. ".scr", "r")
     if not file then
         print("provided script (" .. script .. ") is not a valid vnds script")
         return
     end
 
+    -- setup the loading of the file
     lineNumber = 1
-    recursionDepth = 0
-    recursionList = {}
+    recursionDepth = 0 -- seems like i had another idea where if would have their ends stored alongside them,
+    recursionList = {} -- forgot to remove that...
 
     for i in file:lines() do
         -- remove comments and leading/trailing whitespace
@@ -141,21 +185,6 @@ function vnds.loadScript(script)
     end
     file:close()
     vnds.loading = false
-end
-
-function vnds.runScript(script, line)
-    line = line or nil
-
-    if vnds.scripts[script] == nil then
-        vnds.loadScript(script)
-    end
-    -- TODO: run script
-    vnds.script = script
-    if line then
-        vnds.line = line
-    else
-        vnds.line = 1
-    end
 end
 
 function vnds.interpreter()
@@ -211,21 +240,6 @@ function vnds.parseString(s)
             -- if nothing is found, return
             return s
         end
-    end
-end
-
-function vnds.loadGlobals()
-    globs = parseXmlFile(vnds.path .. "/save/global.sav")
-    print("GLOBALS: ")
-    for k, v in pairs(globs.children[1].children) do
-        print("\t" .. v.attrs.name .. " = " .. v.attrs.value)
-        vnds.vars[v.attrs.name] = {}
-        if v.attrs.type == "int" then
-            vnds.vars[v.attrs.name].value = tonumber(v.attrs.value)
-        else
-            vnds.vars[v.attrs.name].value = v.attrs.value
-        end
-        vnds.vars[v.attrs.name].global = true
     end
 end
 
