@@ -21,7 +21,8 @@ Please note that this is currently in developpment as my summer project, and tha
 * text
 * cleartext
 * delay
+
 those are functions that you will have to implement yourself in the frontend.
 I am working on a sample frontend in command line, as well as a full frontend with love2D, stay tuned, i will link them in this readme.
 
-the end goal is to be able to package and run VNDS games for xperia play, then write a frontend for KOreader, and then, maybe reuse the love2D base to make my own visual novel
+the end goal is to be able to package and run VNDS games for xperia play, then write a frontend for KOreader, and then, maybe reuse the love2D base to make my own visual novels
