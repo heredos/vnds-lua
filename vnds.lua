@@ -71,6 +71,7 @@ end
 function vnds.loadGlobals()
     -- use the global.sav xml file to load all the global variables
     --
+    -- TODO: check the save folder exists
     globs = parseXmlFile(vnds.path .. "/save/global.sav")
     -- if the file does not exist return nothing, there are no globals to load
     if not globs then return end
@@ -187,6 +188,9 @@ function vnds.loadScript(script)
     vnds.loading = false
 end
 
+-- this function is meant to be a coroutine that runs lines
+-- until it meets a "delay", a "text" that waits for user input,
+-- or anything that requires waiting for something
 function vnds.interpreter()
     while true do
         line = vnds.scripts[vnds.script].lines[vnds.line]
