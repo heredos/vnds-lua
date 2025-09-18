@@ -544,6 +544,8 @@ label/goto:
 ]]
 function defaultFunctions._goto(args)
     vnds.runScript(vnds.script, vnds.scripts[vnds.script].labels[args])
+    --go back one line to counteract the auto line advancement
+    vnds.line = vnds.line - 1
 end
 
 defaultFunctions["goto"] = defaultFunctions._goto
