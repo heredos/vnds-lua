@@ -462,7 +462,9 @@ vnds.operators[">="] = function(a, b)
 end
 function defaultFunctions._if(args)
     left, operator, right = args:match("^(%S+)%s+(%S+)%s+(%S+)$")
-    -- left is always a variable
+    -- left is always a variable, but it might not exist yet.
+    -- if that is the case, we need to create it
+    if vnds.vars[left] == nil then vnds.functions.setvar(left .. " = 0") end
     left = vnds.vars[left].value
 
     -- right can be either a string, a number or a variable
@@ -475,6 +477,8 @@ function defaultFunctions._if(args)
         if tmp then
             right = tmp
         else
+            -- create the variable if it does not exist yet
+            if vnds.vars[right] == nil then vnds.functions.setvar(right .. " = 0") end
             right = vnds.vars[right].value
         end
     end
