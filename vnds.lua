@@ -319,7 +319,7 @@ function defaultFunctions.setvar(args)
         end
     end
 
-    print(varname .. operator .. parameter)
+    print(varname .. "\t" .. operator .. "\t" .. parameter)
     -- now modify the variable unless it already exists and is global
     global = false
     if vnds.vars[varname] then
@@ -333,6 +333,7 @@ function defaultFunctions.setvar(args)
     end
 
     if not global then
+        print(type(vnds.vars[varname].value) .. "\t|\t" .. type(parameter))
         vnds.vars[varname] = { global = false, value = vnds.operators[operator](vnds.vars[varname].value, parameter) }
         --[[
         -- simple setter
